@@ -1,4 +1,4 @@
 .vscode/*
-./balloon
-./*.o
-./balloon.exe
+balloon
+*.o
+balloon.exe
