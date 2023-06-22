@@ -6,7 +6,7 @@
 #define new_ptr(ptr) malloc(sizeof(*ptr))
 #define arr_length(a) sizeof(a) / sizeof(a[0])
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#define degrees()
+#define PLAYER_MAX_HEALTH 10.f
 // https://www.raylib.com/cheatsheet/cheatsheet.html
 
 double rad2degs(double r)
@@ -100,14 +100,15 @@ int main()
     }
     const int screenWidth = 1280;
     const int screenHeight = 720;
-    const int balloon_speed = 100;
+    const int balloon_speed = 400;
+    int player_health = 10;
     InitWindow(screenWidth, screenHeight, "tower defense");
     const Texture2D backgroundTexture = LoadTexture("./Background.png");
     const Texture2D bruhTex = LoadTexture("./balloon.png");
     const Texture2D towerTex = LoadTexture("./tower.png");
     // SetTargetFPS(1);
     float time_until_balloon_spawns = 0.1;
-    while (!WindowShouldClose())
+    while (!WindowShouldClose() && player_health > 0)
     {
         float dt = MIN(GetFrameTime(), 10.f / 1000.f);
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
@@ -124,16 +125,21 @@ int main()
         {
             if (balloons[i] != NULL)
             {
-                if (CheckCollisionPointCircle(tri[balloons[i]->next_pathing_point], balloons[i]->position, balloons[i]->pathing_radius))
-                {
-                    if (balloons[i]->next_pathing_point + 1 < arr_length(tri))
-                        balloons[i]->next_pathing_point++;
-                }
                 Vector2 delta_position = get_vector_towards_position(balloons[i]->position, tri[balloons[i]->next_pathing_point]);
                 delta_position.x *= balloon_speed;
                 delta_position.y *= balloon_speed;
                 balloons[i]->position.x += delta_position.x * dt;
                 balloons[i]->position.y += delta_position.y * dt;
+                if (CheckCollisionPointCircle(tri[balloons[i]->next_pathing_point], balloons[i]->position, balloons[i]->pathing_radius))
+                {
+                    if (balloons[i]->next_pathing_point + 1 < arr_length(tri)) {
+                        balloons[i]->next_pathing_point++;
+                    } else {
+                        player_health = player_health - 1;
+                        free(balloons[i]);
+                        balloons[i] = NULL;
+                    }
+                }
                 // printf("delta %f %f\n", delta_position.x, delta_position.y);
             }
         }
@@ -186,7 +192,7 @@ int main()
                 DrawTexturePro(towerTex, (Rectangle){.x = 0, .y = 0, .width = towerTex.width, .height = towerTex.height}, (Rectangle){.x = monkeys[m]->rect.x, .y = monkeys[m]->rect.y, .width = towerTex.width, .height = towerTex.height}, (Vector2){towerTex.width / 2, towerTex.height / 2}, monkeys[m]->rotation, WHITE);
             }
         }
-        DrawRectangle()
+        DrawRectangle(0, 0, screenWidth * (player_health / PLAYER_MAX_HEALTH), 50, RED);
         EndDrawing();
     }
     UnloadTexture(bruhTex);
