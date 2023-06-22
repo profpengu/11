@@ -1,4 +1,8 @@
-FLAGS = -g -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -Wall -Wpedantic -std=c99
+ifeq ($(TARGET), windows)
+	FLAGS = -g -lraylib -lopengl32 -lgdi32 -lwinmm -Wall -Wpedantic -Werror -std=c99
+else
+	FLAGS = -g -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -Wall -Wpedantic -Werror -std=c99
+endif
 
 default: towergame
 
